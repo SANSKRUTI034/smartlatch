@@ -1,0 +1,36 @@
+#define RELAY1 3  // Pin to control the solenoid lock
+
+char receivedData[20];
+byte index = 0;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(RELAY1, OUTPUT);
+  digitalWrite(RELAY1, HIGH); // Keep solenoid LOCKED initially (relay OFF for Active LOW)
+}
+
+void loop() {
+  while (Serial.available()) {
+    char c = Serial.read();
+
+    if (c == '#') {
+      receivedData[index] = '\0';
+      processCommand();
+      index = 0;
+    } else {
+      if (index < sizeof(receivedData) - 1) {
+        receivedData[index++] = c;
+      }
+    }
+  }
+}
+
+void processCommand() {
+  Serial.println(receivedData);
+
+  if (strcmp(receivedData, "f success") == 0) {
+    digitalWrite(RELAY1, LOW);  // Unlock solenoid (relay ON for Active LOW)
+    delay(3000);
+    digitalWrite(RELAY1, HIGH); // Lock solenoid again (relay OFF)
+  }
+} 
